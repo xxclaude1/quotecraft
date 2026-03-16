@@ -2,13 +2,13 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import { Plus, ArrowLeft, Send, ChevronDown } from 'lucide-react'
+import { Plus, ArrowLeft, Send, ChevronDown, Check } from 'lucide-react'
 import { useQuoteStore } from '../store/quoteStore'
 import { useClientStore } from '../store/clientStore'
 import { LineItemRow } from '../components/quote/LineItemRow'
 import { TotalsPanel } from '../components/quote/TotalsPanel'
 import { Input } from '../components/ui/Input'
-import { Button } from '../components/ui/Button'
+import { Badge } from '../components/ui/Badge'
 import type { LineItem, Quote } from '../types'
 
 const VALIDITY_OPTIONS = [
@@ -118,73 +118,85 @@ export function QuoteBuilder() {
   if (!quote) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-[#6B6560] font-mono text-sm">Loading...</p>
+        <div className="w-5 h-5 border-2 border-stone-300 border-t-accent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="pb-48">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3 md:px-8 border-b border-[#DDD8D0] bg-white">
-        <button onClick={() => navigate('/')} className="p-1 text-[#6B6560] hover:text-[#1A1A1A]">
-          <ArrowLeft size={20} />
-        </button>
-        <div className="flex-1 min-w-0">
-          <span className="font-mono text-xs text-[#6B6560]">{quote.quoteNumber}</span>
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs uppercase font-mono tracking-wider ${
-                quote.status === 'draft' ? 'text-[#6B6560]' : 'text-[#E8580C]'
-              }`}
-            >
-              {quote.status}
-            </span>
+    <div className="pb-52">
+      {/* Header bar */}
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-stone-200">
+        <div className="flex items-center gap-3 px-4 py-3 md:px-8 max-w-4xl mx-auto">
+          <button
+            onClick={() => navigate('/')}
+            className="p-2 -ml-2 text-stone-400 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors duration-100"
+          >
+            <ArrowLeft size={18} />
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[12px] text-stone-400">{quote.quoteNumber}</span>
+              <Badge status={quote.status} />
+            </div>
           </div>
+
+          {quote.status === 'draft' && (
+            <button
+              onClick={handleSend}
+              className="flex items-center gap-1.5 h-9 px-4 bg-accent text-white text-[13px] font-medium rounded-lg hover:bg-accent-hover active:bg-accent-active transition-colors duration-100 shadow-sm shadow-accent/20"
+            >
+              <Send size={14} />
+              Send Quote
+            </button>
+          )}
+          {quote.status === 'sent' && (
+            <button
+              onClick={() => handleUpdate({ status: 'accepted' })}
+              className="flex items-center gap-1.5 h-9 px-4 bg-success text-white text-[13px] font-medium rounded-lg hover:bg-success/90 transition-colors duration-100"
+            >
+              <Check size={14} />
+              Mark Accepted
+            </button>
+          )}
         </div>
-        {quote.status === 'draft' && (
-          <Button onClick={handleSend} size="sm" className="gap-1.5">
-            <Send size={14} />
-            Send
-          </Button>
-        )}
       </div>
 
       {/* Quote Form */}
-      <div className="p-4 md:p-8 space-y-4">
-        {/* Job Title */}
+      <div className="px-5 py-6 md:px-8 space-y-5">
         <Input
           value={quote.jobTitle}
           onChange={(e) => handleUpdate({ jobTitle: e.target.value })}
-          placeholder="Job title — e.g. Bathroom reno, 42 Smith St"
+          placeholder="e.g. Bathroom reno — 42 Smith St"
           label="Job Title"
-          className="text-base font-medium"
+          className="text-[15px] font-medium"
         />
 
-        {/* Client Select */}
-        <div>
-          <label className="text-xs font-light text-[#6B6560] uppercase tracking-wider">
+        {/* Client dropdown */}
+        <div className="relative">
+          <label className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
             Client
           </label>
           <button
             onClick={() => setShowClientSelect(!showClientSelect)}
-            className="w-full h-11 px-3 mt-1 bg-white border border-[#DDD8D0] rounded text-left flex items-center justify-between text-sm text-[#1A1A1A] hover:border-[#1A1A1A] transition-colors duration-100"
+            className="w-full h-11 px-3.5 mt-1.5 bg-white border border-stone-300 rounded-lg text-left flex items-center justify-between text-[14px] text-stone-900 hover:border-stone-400 focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-100 focus-ring"
           >
-            <span className={selectedClient ? '' : 'text-[#6B6560]/50'}>
+            <span className={selectedClient ? '' : 'text-stone-400'}>
               {selectedClient?.name ?? 'Select client (optional)'}
             </span>
-            <ChevronDown size={16} className="text-[#6B6560]" />
+            <ChevronDown size={15} className={`text-stone-400 transition-transform duration-100 ${showClientSelect ? 'rotate-180' : ''}`} />
           </button>
 
           {showClientSelect && (
-            <div className="mt-1 bg-white border border-[#DDD8D0] rounded shadow-sm max-h-48 overflow-y-auto">
-              <div className="p-2 border-b border-[#DDD8D0]">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg shadow-stone-900/5 max-h-56 overflow-y-auto z-20">
+              <div className="sticky top-0 p-2.5 border-b border-stone-100 bg-white">
                 <input
                   type="text"
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
                   placeholder="Search clients..."
-                  className="w-full text-sm bg-transparent outline-none"
+                  className="w-full text-[13px] bg-stone-50 rounded-lg px-3 py-2 outline-none border border-stone-200 focus:border-accent"
                   autoFocus
                 />
               </div>
@@ -193,7 +205,7 @@ export function QuoteBuilder() {
                   handleUpdate({ clientId: undefined })
                   setShowClientSelect(false)
                 }}
-                className="w-full px-3 py-2 text-left text-sm text-[#6B6560] hover:bg-[#EDE9E3]"
+                className="w-full px-4 py-2.5 text-left text-[13px] text-stone-400 hover:bg-stone-50"
               >
                 No client
               </button>
@@ -205,11 +217,13 @@ export function QuoteBuilder() {
                     setShowClientSelect(false)
                     setClientSearch('')
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#EDE9E3]"
+                  className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-stone-50 transition-colors duration-75 ${
+                    quote.clientId === client.id ? 'text-accent font-medium' : 'text-stone-900'
+                  }`}
                 >
                   {client.name}
                   {client.address && (
-                    <span className="block text-[10px] text-[#6B6560]">{client.address}</span>
+                    <span className="block text-[11px] text-stone-400 mt-0.5">{client.address}</span>
                   )}
                 </button>
               ))}
@@ -219,18 +233,18 @@ export function QuoteBuilder() {
 
         {/* Validity */}
         <div>
-          <label className="text-xs font-light text-[#6B6560] uppercase tracking-wider">
+          <label className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
             Valid For
           </label>
-          <div className="flex gap-1.5 mt-1">
+          <div className="flex gap-2 mt-1.5">
             {VALIDITY_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => handleUpdate({ validForDays: parseInt(opt.value) as Quote['validForDays'] })}
-                className={`px-3 py-1.5 text-xs font-mono rounded transition-colors duration-100 ${
+                className={`px-3.5 py-2 text-[12px] font-mono font-medium rounded-lg transition-all duration-100 ${
                   quote.validForDays === parseInt(opt.value)
-                    ? 'bg-[#1A1A1A] text-white'
-                    : 'bg-white border border-[#DDD8D0] text-[#6B6560] hover:bg-[#EDE9E3]'
+                    ? 'bg-stone-900 text-white shadow-sm'
+                    : 'bg-white border border-stone-300 text-stone-600 hover:border-stone-400 hover:bg-stone-50'
                 }`}
               >
                 {opt.label}
@@ -240,15 +254,16 @@ export function QuoteBuilder() {
         </div>
       </div>
 
-      {/* Line Items */}
+      {/* Line Items section */}
       <div>
-        <div className="flex items-center justify-between px-4 md:px-8 py-2">
-          <h3 className="text-xs font-light text-[#6B6560] uppercase tracking-wider">
-            Line Items ({quote.lineItems.length})
+        <div className="flex items-center justify-between px-5 md:px-8 pb-2">
+          <h3 className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
+            Line Items
           </h3>
+          <span className="text-[11px] text-stone-400 font-mono">{quote.lineItems.length} items</span>
         </div>
 
-        <div className="border-t border-[#DDD8D0]">
+        <div className="divide-y divide-stone-100 border-y border-stone-200">
           <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext
               items={quote.lineItems.map((i) => i.id)}
@@ -267,30 +282,30 @@ export function QuoteBuilder() {
           </DndContext>
 
           {quote.lineItems.length === 0 && (
-            <div className="px-4 py-8 text-center bg-white border-b border-[#DDD8D0]">
-              <p className="text-sm text-[#6B6560]">No line items yet</p>
-              <p className="text-xs text-[#6B6560]/50 mt-1">
-                Tap the + button below to add items
+            <div className="px-5 py-12 text-center bg-white">
+              <p className="text-[13px] text-stone-500">No line items yet</p>
+              <p className="text-[11px] text-stone-400 mt-1">
+                Add items to start building your quote
               </p>
             </div>
           )}
         </div>
 
-        {/* Add line item button */}
-        <div className="px-4 py-3 md:px-8">
+        {/* Add button */}
+        <div className="px-5 py-4 md:px-8">
           <button
             onClick={handleAddLineItem}
-            className="w-full flex items-center justify-center gap-1.5 py-3 border-2 border-dashed border-[#DDD8D0] rounded text-sm text-[#6B6560] hover:border-[#E8580C] hover:text-[#E8580C] transition-colors duration-100"
+            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-stone-300 rounded-xl text-[13px] font-medium text-stone-500 hover:border-accent hover:text-accent hover:bg-accent/3 transition-all duration-100"
           >
-            <Plus size={16} />
+            <Plus size={16} strokeWidth={2} />
             Add Line Item
           </button>
         </div>
       </div>
 
       {/* Notes */}
-      <div className="px-4 md:px-8 py-2">
-        <label className="text-xs font-light text-[#6B6560] uppercase tracking-wider">
+      <div className="px-5 md:px-8 pb-4">
+        <label className="text-[11px] font-medium text-stone-500 uppercase tracking-[0.08em]">
           Notes / Scope of Work
         </label>
         <textarea
@@ -298,12 +313,12 @@ export function QuoteBuilder() {
           onChange={(e) => handleUpdate({ notes: e.target.value })}
           placeholder="Terms, exclusions, scope details..."
           rows={3}
-          className="w-full mt-1 px-3 py-2 bg-white border border-[#DDD8D0] rounded text-sm text-[#1A1A1A] placeholder:text-[#6B6560]/40 outline-none focus:border-[#1A1A1A] resize-y"
+          className="w-full mt-1.5 px-3.5 py-3 bg-white border border-stone-300 rounded-lg text-[14px] text-stone-900 placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-y transition-all duration-100"
         />
       </div>
 
       {/* Sticky Totals */}
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-56 z-40 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-60 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <TotalsPanel
           lineItems={quote.lineItems}
           includeGst={quote.includeGst}

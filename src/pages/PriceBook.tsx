@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
 import { db } from '../db/database'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Input } from '../components/ui/Input'
@@ -10,18 +10,18 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { v4 as uuid } from 'uuid'
 
 const CATEGORIES = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All Categories' },
   { value: 'labour', label: 'Labour' },
   { value: 'materials', label: 'Materials' },
   { value: 'equipment', label: 'Equipment' },
   { value: 'other', label: 'Other' },
 ]
 
-const CATEGORY_COLORS: Record<string, string> = {
-  labour: 'bg-blue-100 text-blue-700',
-  materials: 'bg-amber-100 text-amber-700',
-  equipment: 'bg-purple-100 text-purple-700',
-  other: 'bg-gray-100 text-gray-600',
+const CATEGORY_STYLES: Record<string, string> = {
+  labour: 'bg-blue-50 text-blue-600 border-blue-200',
+  materials: 'bg-amber-50 text-amber-600 border-amber-200',
+  equipment: 'bg-violet-50 text-violet-600 border-violet-200',
+  other: 'bg-stone-100 text-stone-500 border-stone-200',
 }
 
 export function PriceBook() {
@@ -63,33 +63,33 @@ export function PriceBook() {
   }
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Price Book"
-        subtitle="Saved line items"
+        subtitle={`${items.length} saved items`}
         action={
           <Button size="sm" onClick={() => setShowForm(true)}>
-            <Plus size={16} className="mr-1" /> Add
+            <Plus size={15} className="mr-1" /> Add Item
           </Button>
         }
       />
 
       {/* Search & Filter */}
-      <div className="px-4 md:px-8 pb-3 flex gap-2">
+      <div className="px-5 md:px-8 pb-4 flex gap-2">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6560]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search items..."
-            className="w-full h-10 pl-9 pr-3 bg-white border border-[#DDD8D0] rounded text-sm outline-none focus:border-[#1A1A1A]"
+            className="w-full h-11 pl-10 pr-4 bg-white border border-stone-300 rounded-lg text-[14px] outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="h-10 px-2 bg-white border border-[#DDD8D0] rounded text-sm outline-none"
+          className="h-11 px-3 bg-white border border-stone-300 rounded-lg text-[13px] text-stone-700 outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent appearance-none"
         >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -99,8 +99,8 @@ export function PriceBook() {
 
       {/* Add Form */}
       {showForm && (
-        <div className="mx-4 md:mx-8 mb-4 p-4 bg-white border border-[#DDD8D0] rounded space-y-3">
-          <h3 className="font-mono text-sm font-bold">New Item</h3>
+        <div className="mx-5 md:mx-8 mb-5 p-5 bg-white border border-stone-200 rounded-xl shadow-sm space-y-4">
+          <h3 className="font-mono text-[14px] font-medium text-stone-900">New Price Book Item</h3>
           <Input
             label="Description"
             value={formData.description}
@@ -130,54 +130,54 @@ export function PriceBook() {
               mono
             />
             <Input
-              label="Unit Price"
+              label="Unit Price ($)"
               type="number"
               value={String(formData.unitPrice)}
               onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
               mono
             />
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleSave}>Save</Button>
+          <div className="flex gap-2 pt-1">
+            <Button onClick={handleSave}>Save Item</Button>
             <Button variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
           </div>
         </div>
       )}
 
       {/* Items List */}
-      <div className="border-t border-[#DDD8D0]">
+      <div className="divide-y divide-stone-200/60">
         {filtered.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-[#6B6560] text-sm">No items found</p>
+          <div className="px-5 py-16 text-center">
+            <p className="text-[14px] text-stone-600 font-medium">No items found</p>
           </div>
         ) : (
           filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 px-4 md:px-8 py-3 border-b border-[#DDD8D0] hover:bg-[#EDE9E3] transition-colors duration-100"
+              className="group flex items-center gap-4 px-5 md:px-8 py-4 hover:bg-white transition-all duration-100"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#1A1A1A] truncate">{item.description}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className={`text-[10px] uppercase px-1.5 py-0.5 rounded font-mono ${CATEGORY_COLORS[item.category]}`}>
+                <p className="text-[14px] font-medium text-stone-900 truncate">{item.description}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className={`text-[10px] uppercase tracking-widest font-medium px-2 py-0.5 rounded-md border ${CATEGORY_STYLES[item.category]}`}>
                     {item.category}
                   </span>
-                  <span className="text-[10px] text-[#6B6560]">
+                  <span className="text-[11px] text-stone-400 font-mono">
                     {item.defaultQuantity} {item.unit}
                   </span>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-mono text-sm font-bold text-[#1A1A1A]">
+                <p className="font-mono text-[15px] font-medium text-stone-900 tabular-nums">
                   {formatCurrency(item.unitPrice)}
                 </p>
-                <p className="text-[10px] text-[#6B6560]">per {item.unit}</p>
+                <p className="text-[11px] text-stone-400">per {item.unit}</p>
               </div>
               <button
                 onClick={() => handleDelete(item.id)}
-                className="text-[10px] text-[#B84233] hover:text-[#8e3428] ml-2"
+                className="p-2 text-stone-300 hover:text-error rounded-lg hover:bg-error/5 opacity-0 group-hover:opacity-100 transition-all duration-100"
               >
-                Delete
+                <Trash2 size={14} />
               </button>
             </div>
           ))

@@ -14,118 +14,117 @@ export function SettingsPage() {
   if (!business) return null
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader title="Settings" subtitle="Business profile & preferences" />
 
-      <div className="px-4 md:px-8 space-y-6 pb-8">
+      <div className="px-5 md:px-8 space-y-8">
         {/* Business Info */}
-        <section>
-          <h3 className="font-mono text-xs font-bold text-[#1A1A1A] uppercase tracking-wider mb-3">
-            Business Info
+        <section className="bg-white rounded-xl border border-stone-200 p-5 md:p-6 space-y-4">
+          <h3 className="font-mono text-[12px] font-medium text-stone-500 uppercase tracking-[0.08em]">
+            Business Information
           </h3>
-          <div className="space-y-3">
+          <Input
+            label="Business Name"
+            value={business.name}
+            onChange={(e) => updateSettings({ name: e.target.value })}
+          />
+          <Input
+            label="ABN"
+            value={business.abn ?? ''}
+            onChange={(e) => updateSettings({ abn: e.target.value })}
+            placeholder="XX XXX XXX XXX"
+            mono
+          />
+          <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Business Name"
-              value={business.name}
-              onChange={(e) => updateSettings({ name: e.target.value })}
+              label="Phone"
+              value={business.phone ?? ''}
+              onChange={(e) => updateSettings({ phone: e.target.value })}
+              type="tel"
+              placeholder="04XX XXX XXX"
             />
             <Input
-              label="ABN"
-              value={business.abn ?? ''}
-              onChange={(e) => updateSettings({ abn: e.target.value })}
-              placeholder="XX XXX XXX XXX"
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Phone"
-                value={business.phone ?? ''}
-                onChange={(e) => updateSettings({ phone: e.target.value })}
-                type="tel"
-              />
-              <Input
-                label="Email"
-                value={business.email ?? ''}
-                onChange={(e) => updateSettings({ email: e.target.value })}
-                type="email"
-              />
-            </div>
-            <Input
-              label="Address"
-              value={business.address ?? ''}
-              onChange={(e) => updateSettings({ address: e.target.value })}
+              label="Email"
+              value={business.email ?? ''}
+              onChange={(e) => updateSettings({ email: e.target.value })}
+              type="email"
+              placeholder="you@business.com.au"
             />
           </div>
+          <Input
+            label="Address"
+            value={business.address ?? ''}
+            onChange={(e) => updateSettings({ address: e.target.value })}
+            placeholder="Business address"
+          />
         </section>
-
-        <div className="border-t border-[#DDD8D0]" />
 
         {/* Quote Settings */}
-        <section>
-          <h3 className="font-mono text-xs font-bold text-[#1A1A1A] uppercase tracking-wider mb-3">
-            Quote Settings
+        <section className="bg-white rounded-xl border border-stone-200 p-5 md:p-6 space-y-4">
+          <h3 className="font-mono text-[12px] font-medium text-stone-500 uppercase tracking-[0.08em]">
+            Quote Defaults
           </h3>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Quote Prefix"
-                value={business.quotePrefix}
-                onChange={(e) => updateSettings({ quotePrefix: e.target.value })}
-                mono
-              />
-              <Input
-                label="Next Number"
-                type="number"
-                value={String(business.nextQuoteNumber)}
-                onChange={(e) =>
-                  updateSettings({ nextQuoteNumber: parseInt(e.target.value) || 1 })
-                }
-                mono
-              />
-            </div>
-            <Select
-              label="Currency"
-              value={business.currency}
-              onChange={(e) => updateSettings({ currency: e.target.value as 'AUD' | 'NZD' | 'USD' })}
-              options={[
-                { value: 'AUD', label: 'AUD — Australian Dollar' },
-                { value: 'NZD', label: 'NZD — New Zealand Dollar' },
-                { value: 'USD', label: 'USD — US Dollar' },
-              ]}
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Quote Prefix"
+              value={business.quotePrefix}
+              onChange={(e) => updateSettings({ quotePrefix: e.target.value })}
+              mono
             />
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <p className="text-sm text-[#1A1A1A]">GST Included by Default</p>
-                <p className="text-xs text-[#6B6560]">Apply 10% GST to new quotes</p>
-              </div>
-              <button
-                onClick={() => updateSettings({ gstDefault: !business.gstDefault })}
-                className={`w-10 h-5 rounded-full transition-colors duration-100 relative ${
-                  business.gstDefault ? 'bg-[#2A7D6E]' : 'bg-[#DDD8D0]'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-100 ${
-                    business.gstDefault ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
-                />
-              </button>
+            <Input
+              label="Next Number"
+              type="number"
+              value={String(business.nextQuoteNumber)}
+              onChange={(e) =>
+                updateSettings({ nextQuoteNumber: parseInt(e.target.value) || 1 })
+              }
+              mono
+            />
+          </div>
+          <Select
+            label="Currency"
+            value={business.currency}
+            onChange={(e) => updateSettings({ currency: e.target.value as 'AUD' | 'NZD' | 'USD' })}
+            options={[
+              { value: 'AUD', label: 'AUD - Australian Dollar' },
+              { value: 'NZD', label: 'NZD - New Zealand Dollar' },
+              { value: 'USD', label: 'USD - US Dollar' },
+            ]}
+          />
+          <div className="flex items-center justify-between py-3 border-t border-stone-100 mt-2">
+            <div>
+              <p className="text-[14px] font-medium text-stone-900">GST Included by Default</p>
+              <p className="text-[12px] text-stone-500 mt-0.5">Apply 10% GST to new quotes automatically</p>
             </div>
+            <button
+              onClick={() => updateSettings({ gstDefault: !business.gstDefault })}
+              className={`w-11 h-6 rounded-full transition-colors duration-150 relative shrink-0 ${
+                business.gstDefault ? 'bg-success' : 'bg-stone-300'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-150 ${
+                  business.gstDefault ? 'translate-x-5.5' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </section>
 
-        <div className="border-t border-[#DDD8D0]" />
-
         {/* Default Terms */}
-        <section>
-          <h3 className="font-mono text-xs font-bold text-[#1A1A1A] uppercase tracking-wider mb-3">
+        <section className="bg-white rounded-xl border border-stone-200 p-5 md:p-6 space-y-4">
+          <h3 className="font-mono text-[12px] font-medium text-stone-500 uppercase tracking-[0.08em]">
             Default Terms & Conditions
           </h3>
+          <p className="text-[12px] text-stone-400 -mt-1">
+            These will be appended to every quote automatically
+          </p>
           <textarea
             value={business.defaultTerms ?? ''}
             onChange={(e) => updateSettings({ defaultTerms: e.target.value })}
-            placeholder="Enter your standard terms and conditions. These will be appended to every quote."
-            rows={6}
-            className="w-full px-3 py-2 bg-white border border-[#DDD8D0] rounded text-sm text-[#1A1A1A] placeholder:text-[#6B6560]/40 outline-none focus:border-[#1A1A1A] resize-y"
+            placeholder="Enter your standard terms and conditions..."
+            rows={8}
+            className="w-full px-3.5 py-3 bg-stone-50 border border-stone-200 rounded-lg text-[14px] text-stone-900 placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-y transition-all duration-100"
           />
         </section>
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText } from 'lucide-react'
+import { FileText, ArrowRight } from 'lucide-react'
 import { db } from '../db/database'
 import { useQuoteStore } from '../store/quoteStore'
 import { PageHeader } from '../components/layout/PageHeader'
@@ -34,46 +34,55 @@ export function Templates() {
     template.lineItems.reduce((sum, li) => sum + li.quantity * li.unitPrice, 0)
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader
         title="Templates"
-        subtitle="Reusable quote templates"
+        subtitle="Reusable quote starting points"
       />
 
-      <div className="border-t border-[#DDD8D0]">
+      <div className="px-5 md:px-8 space-y-3">
         {templates.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-[#6B6560] text-sm">No templates yet</p>
-            <p className="text-xs text-[#6B6560]/50 mt-1">
-              Templates will appear here once created
-            </p>
+          <div className="py-16 text-center">
+            <div className="w-12 h-12 bg-stone-200 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <FileText size={20} className="text-stone-400" />
+            </div>
+            <p className="text-[14px] text-stone-600 font-medium">No templates yet</p>
+            <p className="text-[12px] text-stone-400 mt-1">Templates will appear here once created</p>
           </div>
         ) : (
           templates.map((template) => (
             <div
               key={template.id}
-              className="flex items-center gap-3 px-4 md:px-8 py-3 border-b border-[#DDD8D0] hover:bg-[#EDE9E3] transition-colors duration-100"
+              className="group bg-white rounded-xl border border-stone-200 p-5 hover:border-stone-300 hover:shadow-sm transition-all duration-100"
             >
-              <div className="w-9 h-9 rounded bg-[#EDE9E3] flex items-center justify-center shrink-0">
-                <FileText size={16} className="text-[#6B6560]" />
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-lg bg-accent/8 flex items-center justify-center shrink-0 mt-0.5">
+                  <FileText size={18} className="text-accent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-[14px] font-medium text-stone-900">{template.name}</h4>
+                  {template.description && (
+                    <p className="text-[12px] text-stone-500 mt-0.5">{template.description}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-[11px] text-stone-400 font-mono">
+                      {template.lineItems.length} items
+                    </span>
+                    <span className="text-[11px] text-stone-300">|</span>
+                    <span className="text-[11px] text-stone-400 font-mono">
+                      Base: {formatCurrency(templateTotal(template))}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => handleCreateFromTemplate(template)}
+                  className="shrink-0"
+                >
+                  Use Template
+                  <ArrowRight size={13} className="ml-1" />
+                </Button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#1A1A1A] truncate">{template.name}</p>
-                {template.description && (
-                  <p className="text-xs text-[#6B6560] truncate">{template.description}</p>
-                )}
-                <p className="text-[10px] text-[#6B6560]/60 mt-0.5">
-                  {template.lineItems.length} items · Base value{' '}
-                  <span className="font-mono">{formatCurrency(templateTotal(template))}</span>
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => handleCreateFromTemplate(template)}
-                className="shrink-0"
-              >
-                <Plus size={14} className="mr-1" /> Use
-              </Button>
             </div>
           ))
         )}

@@ -1,19 +1,11 @@
 import type { QuoteStatus } from '../../types'
 
-const statusStyles: Record<QuoteStatus, string> = {
-  draft: 'bg-[#EDE9E3] text-[#6B6560]',
-  sent: 'bg-[#E8580C]/10 text-[#E8580C]',
-  accepted: 'bg-[#2A7D6E]/10 text-[#2A7D6E]',
-  declined: 'bg-[#B84233]/10 text-[#B84233]',
-  expired: 'bg-[#EDE9E3] text-[#6B6560]/50',
-}
-
-const statusLabels: Record<QuoteStatus, string> = {
-  draft: 'Draft',
-  sent: 'Sent',
-  accepted: 'Accepted',
-  declined: 'Declined',
-  expired: 'Expired',
+const statusConfig: Record<QuoteStatus, { bg: string; text: string; dot: string; label: string }> = {
+  draft: { bg: 'bg-stone-200', text: 'text-stone-600', dot: 'bg-stone-400', label: 'Draft' },
+  sent: { bg: 'bg-accent/8', text: 'text-accent', dot: 'bg-accent', label: 'Sent' },
+  accepted: { bg: 'bg-success/8', text: 'text-success', dot: 'bg-success', label: 'Accepted' },
+  declined: { bg: 'bg-error/8', text: 'text-error', dot: 'bg-error', label: 'Declined' },
+  expired: { bg: 'bg-stone-200', text: 'text-stone-400', dot: 'bg-stone-300', label: 'Expired' },
 }
 
 interface BadgeProps {
@@ -21,14 +13,16 @@ interface BadgeProps {
 }
 
 export function Badge({ status }: BadgeProps) {
+  const config = statusConfig[status]
   return (
     <span
       className={`
-        inline-flex items-center px-2 py-0.5 text-xs font-mono font-medium uppercase tracking-wide rounded
-        ${statusStyles[status]}
+        inline-flex items-center gap-1.5 px-2 py-1 text-[11px] font-mono font-medium uppercase tracking-wider rounded-md
+        ${config.bg} ${config.text}
       `}
     >
-      {statusLabels[status]}
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+      {config.label}
     </span>
   )
 }
